@@ -1,0 +1,143 @@
+name: Daily AI Learning Check-in
+
+on:
+  schedule:
+    - cron: "0 2 * * *"  # 8:00 AM IST (UTC+5:30 = UTC 02:30, using 02:00 as close approx)
+  workflow_dispatch:
+
+jobs:
+  create-checkin:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Get day info and create check-in issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const today = new Date();
+            const day = days[today.getDay()];
+            const dateStr = today.toISOString().split('T')[0];
+
+            const schedule = {
+              Monday: {
+                topic: "🦜 LangChain Basics",
+                goal: "Understand chains, prompts, and LLM wrappers in LangChain",
+                tasks: [
+                  "Read the LangChain quickstart docs",
+                  "Build a simple LLM chain that summarizes text",
+                  "Experiment with PromptTemplate and LLMChain",
+                ],
+                resource: "https://python.langchain.com/docs/get_started/quickstart",
+                tip: "Focus on understanding HOW chains work, not memorizing the API.",
+              },
+              Tuesday: {
+                topic: "🧠 Prompt Engineering",
+                goal: "Master the art of writing effective prompts for LLMs",
+                tasks: [
+                  "Learn zero-shot, few-shot, and chain-of-thought prompting",
+                  "Write 5 different prompts for the same task and compare outputs",
+                  "Practice structured output (JSON mode) with OpenAI or Claude",
+                ],
+                resource: "https://www.promptingguide.ai/",
+                tip: "The best prompt engineers iterate fast. Write, test, improve.",
+              },
+              Wednesday: {
+                topic: "🗄️ Vector Databases & Embeddings",
+                goal: "Understand how embeddings and vector search power RAG systems",
+                tasks: [
+                  "Learn what embeddings are and why they matter",
+                  "Set up ChromaDB locally and store some documents",
+                  "Query ChromaDB using semantic search",
+                ],
+                resource: "https://docs.trychroma.com/getting-started",
+                tip: "Embeddings are the backbone of RAG. Really understand this.",
+              },
+              Thursday: {
+                topic: "⚡ FastAPI for AI Apps",
+                goal: "Learn to serve your AI models as REST APIs",
+                tasks: [
+                  "Build a FastAPI endpoint that calls an LLM and returns a response",
+                  "Add request/response models using Pydantic",
+                  "Test your API with curl or a REST client",
+                ],
+                resource: "https://fastapi.tiangolo.com/tutorial/first-steps/",
+                tip: "FastAPI is the standard for serving ML models. Learn it well.",
+              },
+              Friday: {
+                topic: "🔨 Build Day — RAG Pipeline",
+                goal: "Put it all together: build a mini RAG chatbot",
+                tasks: [
+                  "Load a PDF or text file into ChromaDB",
+                  "Create a LangChain retriever that queries ChromaDB",
+                  "Hook it up to an LLM to answer questions from the document",
+                ],
+                resource: "https://python.langchain.com/docs/use_cases/question_answering/",
+                tip: "Don't aim for perfect. Get something working first, then improve.",
+              },
+              Saturday: {
+                topic: "📤 Review & Push to GitHub",
+                goal: "Consolidate the week's learning and make it visible",
+                tasks: [
+                  "Push any code you wrote this week to GitHub with a good README",
+                  "Write a short summary (even just bullet points) of what you learned",
+                  "Look for 1 open source issue related to AI/ML to contribute to",
+                ],
+                resource: "https://github.com/prudhvirapeti",
+                tip: "Consistency on GitHub is more impressive than any single project.",
+              },
+              Sunday: {
+                topic: "🌿 Rest or Catch Up",
+                goal: "Recharge and review anything you missed this week",
+                tasks: [
+                  "Watch 1 YouTube video on AI engineering (Andrej Karpathy, Yannic Kilcher, etc.)",
+                  "Review your notes from this week",
+                  "Optional: catch up on any incomplete tasks",
+                ],
+                resource: "https://www.youtube.com/@AndrejKarpathy",
+                tip: "Rest is part of the process. Burnout kills habits.",
+              },
+            };
+
+            const s = schedule[day];
+            const taskList = s.tasks.map(t => `- [ ] ${t}`).join('\n');
+
+            const week = Math.ceil((today - new Date(today.getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+
+            const body = `## 🗓️ ${dateStr} — ${day}
+
+> **${s.topic}**
+
+### 🎯 Today's Goal
+${s.goal}
+
+### ✅ Tasks
+${taskList}
+
+### 📚 Resource
+[${s.resource}](${s.resource})
+
+### 💡 Tip
+> ${s.tip}
+
+---
+
+### 📝 Log Your Progress
+Reply to this issue with:
+1. ✅ What did you complete today?
+2. 🧠 What did you learn?
+3. ❌ What did you skip and why?
+4. ⭐ Rate your focus today (1–5)
+
+---
+*Week ${week} of your AI Engineering journey 🚀*`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📅 Daily Check-in: ${day} ${dateStr} — ${s.topic}`,
+              body: body,
+              labels: [day.toLowerCase(), 'daily-checkin'],
+            });
