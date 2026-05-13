@@ -60,3 +60,4 @@ I reply to each issue to log what I did. This keeps me accountable and builds my
 A GitHub Actions workflow runs every morning at **8:00 AM IST** and opens a new issue with the day's study plan. I comment on it with my progress update.
 
 Each completed issue = a contribution on my graph = visible proof of consistency.
+
