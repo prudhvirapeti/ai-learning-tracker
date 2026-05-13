@@ -2,7 +2,7 @@ name: Daily AI Learning Check-in
 
 on:
   schedule:
-    - cron: "0 2 * * *"  # 8:00 AM IST (UTC+5:30 = UTC 02:30, using 02:00 as close approx)
+    - cron: "0 14 * * *"  # 8:00 AM CST (UTC-6) / 9:00 AM CDT (UTC-5, during daylight saving)
   workflow_dispatch:
 
 jobs:
